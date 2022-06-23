@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<head>
+  <script>
+    !function(n,o){o.forEach(function(o){n[o]||((n.__alloyNS=n.__alloyNS||
+    []).push(o),n[o]=function(){var u=arguments;return new Promise(
+    function(i,l){n[o].q.push([i,l,u])})},n[o].q=[])})}
+    (window,["alloy"]);
+  </script>
+  <script src="/alloy.min.js" async></script>
+</head>
+<html>
+<body>
+
+  <h1>Hybrid POC</h1>
+
+  <h3>Server rendered personalized content</h3>
+  <p>{{PERSONALIZED_CONTENT}}</p>
+
+  <h3>Client rendered personalized content</h3>
+
+  <script>
+    alloy("configure",{
+      orgId: "5BFE274A5F6980A50A495C08@AdobeOrg",
+      edgeConfigId: "bc1a10e0-aee4-4e0e-ac5b-cdbb9abbec83",
+      edgeBasePath: "ee-pre-prd"
+    });
+    alloy("sendEvent", {
+      renderDecisions: true,
+      xdm: {{XDM}}
+    });
+
+  </script>
+</body>
+</html>
