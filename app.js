@@ -36,47 +36,41 @@ app.get("/", async (req, res) => {
   const FPID = req.cookies.myidcookie || randomUUID();
   res.cookie("myidcookie", FPID, { maxAge: 1000 * 60 * 60 * 24 * 365 });
 
+  // Get the kndctr cookies from the request and pass to experience edge
+  const cookieHeader = Object.keys(req.cookies)
+    .filter(cookieName => cookieName.startsWith("kndctr_97D1F3F459CE0AD80A495CBE_AdobeOrg_"))
+    .map(cookieName => `${cookieName}=${req.cookies[cookieName]};`)
+    .join(" ");
+
   // Get the cluster from the request so that it can be added to the URL
-  const currentCluster = req.cookies["kndctr_5BFE274A5F6980A50A495C08_AdobeOrg_cluster"];
+  const currentCluster = req.cookies["kndctr_97D1F3F459CE0AD80A495CBE_AdobeOrg_cluster"];
   const currentClusterPath = currentCluster ? `/${currentCluster}` : "";
 
   // Make the request to experience edge
-  const configId = "bc1a10e0-aee4-4e0e-ac5b-cdbb9abbec83";
-  const requestId = randomUUID();
-  const url = `https://firstparty.alloyio.com/ee-pre-prd${currentClusterPath}/v1/interact?configId=${configId}&requestId=${requestId}`;
+  const dataStreamId = "dad9f0b7-4d22-41eb-a29e-d765294d483b";
+  const url = `https://edge.adobedc.net/ee-pre-prd${currentClusterPath}/v2/interact?dataStreamId=${dataStreamId}`;
   const body = buildRequestBody({ FPID });
-  const response = await axios.post(url, body);
+  const response = await axios.post(url, body, { headers: { Cookie: cookieHeader } });
 
-  // extract and write the cluster cookie from the experience edge request
-  const cookie =
-    response.headers["set-cookie"].find(cookie => cookie.startsWith("kndctr_5BFE274A5F6980A50A495C08_AdobeOrg_cluster="))
-  if (cookie) {
-    const cluster = cookie.match(/^[^=]*=([^;]*);/)[1];
-    res.cookie("kndctr_5BFE274A5F6980A50A495C08_AdobeOrg_cluster", cluster, { maxAge: 1000 * 60 * 30 });
-  }
-
-  // find the personalization decision to apply on the server
-  const payload = response.data.handle
-    .filter(handle =>
-      handle.type === "personalization:decisions" &&
-      handle.payload[0].scope === "sandbox-personalization-page")
-    .map(handle => handle.payload[0])[0];
-  const content = payload.items[0].data.content;
+  let hybridpocserverPayload;
+  response.data.handle.forEach(({ type, payload }) => {
+    // find the hybridpocserver scope
+    if (type === "personalization:decisions") {
+      if (payload[0].scope === "hybridpocserver") {
+        hybridpocserverPayload = payload[0];
+      }
+    }
+    // transfer the cookies from Edge to the browser
+    if (type === "state:store") {
+      payload.forEach(({ key, value, maxAge }) => {
+        res.cookie(key, value, { maxAge: maxAge * 1000 });
+      })
+    }
+  });
 
   // build the XDM to send the display notification on the client
   const clientXdm = {
-    eventType: "decisioning.propositionDisplay",
-    _experience: {
-      decisioning: {
-        propositions: [
-          {
-            id: payload.id,
-            scope: payload.scope,
-            scopeDetails: payload.scopeDetails
-          }
-        ]
-      }
-    },
+    eventType: "web.webpagedetails.pageViews",
     identityMap: {
       FPID: [
         {
@@ -85,6 +79,24 @@ app.get("/", async (req, res) => {
       ]
     }
   };
+
+  // get the content from the hybridpocserver scope, and update the XDM
+  if (hybridpocserverPayload) {
+    content = hybridpocserverPayload.items[0].data.content;
+    clientXdm._experience = {
+      decisioning: {
+        propositions: [
+          {
+            id: hybridpocserverPayload.id,
+            scope: hybridpocserverPayload.scope,
+            scopeDetails: hybridpocserverPayload.scopeDetails
+          }
+        ]
+      }
+    };
+  } else {
+    content = "No offer returned from edge.";
+  }
 
   // Send the contents of index.html with the two items from the server
   res.set("Content-Type", "text/html");

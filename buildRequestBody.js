@@ -12,42 +12,40 @@ governing permissions and limitations under the License.
 
 module.exports = ({ FPID }) => {
   const body = {
-    "events": [
-        {
-            "query": {
-                "personalization": {
-                    "schemas": [
-                        "https://ns.adobe.com/personalization/html-content-item",
-                        "https://ns.adobe.com/personalization/json-content-item"
-                    ],
-                    "decisionScopes": [
-                        "sandbox-personalization-page"
-                    ]
+    "query": {
+        "personalization": {
+            "schemas": [
+                "https://ns.adobe.com/personalization/html-content-item",
+                "https://ns.adobe.com/personalization/json-content-item"
+            ],
+            "decisionScopes": [
+                "hybridpocserver"
+            ]
+        }
+    },
+    "event": {
+        "xdm": {
+            "web": {
+                "webPageDetails": {
+                    "URL": "https://localhost:3000"
                 }
             },
-            "xdm": {
-                "web": {
-                    "webPageDetails": {
-                        "URL": "https://localhost:3000"
-                    }
-                },
-                "timestamp": new Date().toISOString(),
-                "implementationDetails": {
-                    "name": "https://ns.adobe.com/experience/alloy",
-                    "version": "2.11.0",
-                    "environment": "browser"
-                },
-                "eventType": "server-view",
-                "identityMap": {
-                  "FPID": [
-                    {
-                      id: FPID
-                    }
-                  ]
+            "timestamp": new Date().toISOString(),
+            "implementationDetails": {
+                "name": "https://ns.adobe.com/experience/serverapi",
+                "version": "1.0",
+                "environment": "server"
+            },
+            "eventType": "server-view",
+            "identityMap": {
+              "FPID": [
+                {
+                  id: FPID
                 }
+              ]
             }
         }
-    ],
+    },
     "meta": {
         "state": {
             "domain": "alloyio.com",

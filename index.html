@@ -13,23 +13,34 @@
 
   <h1>Hybrid POC</h1>
 
-  <h3>Server rendered personalized content</h3>
-  <p>{{PERSONALIZED_CONTENT}}</p>
+  <h3>Server rendered personalized content:</h3>
+  <button id="serverrendered">{{PERSONALIZED_CONTENT}}</button>
 
-  <h3>Client rendered personalized content</h3>
+  <h3>Client rendered personalized content:</h3>
+  <button><h3 id="clientrendered">Default content</h3></button>
 
   <script>
+    const xdm = {{XDM}};
     alloy("configure",{
-      orgId: "5BFE274A5F6980A50A495C08@AdobeOrg",
-      edgeConfigId: "bc1a10e0-aee4-4e0e-ac5b-cdbb9abbec83",
+      orgId: "97D1F3F459CE0AD80A495CBE@AdobeOrg",
+      edgeConfigId: "bc58b968-5317-4f56-991c-646ac1a384f6",
       edgeBasePath: "ee-pre-prd",
-      idMigrationEnabled: false
+      idMigrationEnabled: false,
+      thirdPartyCookiesEnabled: false
     });
     alloy("sendEvent", {
       renderDecisions: true,
-      xdm: {{XDM}}
+      xdm
     });
-
+    document.getElementById("serverrendered").addEventListener("click", e => {
+      alloy("sendEvent", {
+        renderDecisions: true,
+        xdm: {
+          ...xdm,
+          eventType: "decisioning.propositionInteract"
+        }
+      });
+    });
   </script>
 </body>
 </html>
