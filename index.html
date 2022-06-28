@@ -20,7 +20,6 @@
   <button><h3 id="clientrendered">Default content</h3></button>
 
   <script>
-    const xdm = {{XDM}};
     alloy("configure",{
       orgId: "97D1F3F459CE0AD80A495CBE@AdobeOrg",
       edgeConfigId: "bc58b968-5317-4f56-991c-646ac1a384f6",
@@ -29,16 +28,14 @@
       thirdPartyCookiesEnabled: false
     });
     alloy("sendEvent", {
-      renderDecisions: true,
-      xdm
+      renderDecisions: true
+    });
+    alloy("sendEvent", {
+      xdm: {{DISPLAY_XDM}}
     });
     document.getElementById("serverrendered").addEventListener("click", e => {
       alloy("sendEvent", {
-        renderDecisions: true,
-        xdm: {
-          ...xdm,
-          eventType: "decisioning.propositionInteract"
-        }
+        xdm: {{CLICK_XDM}}
       });
     });
   </script>

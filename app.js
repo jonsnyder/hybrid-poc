@@ -69,7 +69,7 @@ app.get("/", async (req, res) => {
   });
 
   // build the XDM to send the display notification on the client
-  const clientXdm = {
+  const displayXdm = {
     eventType: "web.webpagedetails.pageViews",
     identityMap: {
       FPID: [
@@ -79,17 +79,42 @@ app.get("/", async (req, res) => {
       ]
     }
   };
+  const clickXdm = JSON.parse(JSON.stringify(displayXdm));
 
   // get the content from the hybridpocserver scope, and update the XDM
   if (hybridpocserverPayload) {
     content = hybridpocserverPayload.items[0].data.content;
-    clientXdm._experience = {
+    const eventTokens = hybridpocserverPayload.scopeDetails.characteristics.eventTokens;
+    displayXdm.eventType = "decisioning.propositionDisplay";
+    displayXdm._experience = {
       decisioning: {
         propositions: [
           {
             id: hybridpocserverPayload.id,
             scope: hybridpocserverPayload.scope,
-            scopeDetails: hybridpocserverPayload.scopeDetails
+            scopeDetails: {
+              ...hybridpocserverPayload.scopeDetails,
+              characteristics: {
+                eventToken: eventTokens.display
+              }
+            }
+          }
+        ]
+      }
+    };
+    clickXdm.eventType = "decisioning.propositionInteract";
+    clickXdm._experience = {
+      decisioning: {
+        propositions: [
+          {
+            id: hybridpocserverPayload.id,
+            scope: hybridpocserverPayload.scope,
+            scopeDetails: {
+              ...hybridpocserverPayload.scopeDetails,
+              characteristics: {
+                eventToken: eventTokens.click
+              }
+            }
           }
         ]
       }
@@ -102,7 +127,8 @@ app.get("/", async (req, res) => {
   res.set("Content-Type", "text/html");
   res.send(pageContents
     .replace("{{PERSONALIZED_CONTENT}}", content)
-    .replace("{{XDM}}", JSON.stringify(clientXdm, null, 2))
+    .replace("{{DISPLAY_XDM}}", JSON.stringify(displayXdm, null, 2))
+    .replace("{{CLICK_XDM}}", JSON.stringify(clickXdm, null, 2))
   );
 });
 
