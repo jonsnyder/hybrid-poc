@@ -27,7 +27,8 @@ module.exports = ({ FPID }) => {
         "xdm": {
             "web": {
                 "webPageDetails": {
-                    "URL": "https://localhost:3000"
+                    "URL": "https://localhost:3000",
+                    "name": "option2 server"
                 }
             },
             "timestamp": new Date().toISOString(),

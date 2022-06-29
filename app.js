@@ -69,8 +69,13 @@ app.get("/", async (req, res) => {
   });
 
   // build the XDM to send the display notification on the client
-  const clientXdm = {
+  const displayXdm = {
     eventType: "web.webpagedetails.pageViews",
+    web: {
+      webPageDetails: {
+        name: "option2 browser"
+      }
+    },
     identityMap: {
       FPID: [
         {
@@ -79,11 +84,25 @@ app.get("/", async (req, res) => {
       ]
     }
   };
+  const clickXdm = JSON.parse(JSON.stringify(displayXdm));
 
   // get the content from the hybridpocserver scope, and update the XDM
   if (hybridpocserverPayload) {
     content = hybridpocserverPayload.items[0].data.content;
-    clientXdm._experience = {
+    displayXdm.eventType = "decisioning.propositionDisplay";
+    displayXdm._experience = {
+      decisioning: {
+        propositions: [
+          {
+            id: hybridpocserverPayload.id,
+            scope: hybridpocserverPayload.scope,
+            scopeDetails: hybridpocserverPayload.scopeDetails
+          }
+        ]
+      }
+    };
+    clickXdm.eventType = "decisioning.propositionInteract";
+    clickXdm._experience = {
       decisioning: {
         propositions: [
           {
@@ -102,7 +121,8 @@ app.get("/", async (req, res) => {
   res.set("Content-Type", "text/html");
   res.send(pageContents
     .replace("{{PERSONALIZED_CONTENT}}", content)
-    .replace("{{XDM}}", JSON.stringify(clientXdm, null, 2))
+    .replace("{{DISPLAY_XDM}}", JSON.stringify(displayXdm, null, 2))
+    .replace("{{CLICK_XDM}}", JSON.stringify(clickXdm, null, 2))
   );
 });
 
