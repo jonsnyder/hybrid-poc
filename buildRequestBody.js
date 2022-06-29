@@ -28,7 +28,7 @@ module.exports = ({ FPID }) => {
             "web": {
                 "webPageDetails": {
                     "URL": "https://localhost:3000",
-                    "name": "option3 server"
+                    "name": "option4 server"
                 }
             },
             "timestamp": new Date().toISOString(),
