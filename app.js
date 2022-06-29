@@ -73,7 +73,7 @@ app.get("/", async (req, res) => {
     eventType: "web.webpagedetails.pageViews",
     web: {
       webPageDetails: {
-        name: "option1 browser"
+        name: "option3 browser"
       }
     },
     identityMap: {

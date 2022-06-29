@@ -20,26 +20,43 @@
   <button><h3 id="clientrendered">Default content</h3></button>
 
   <script>
+    let displayNotificationSent = false;
+    const displayXdm = {{DISPLAY_XDM}};
     alloy("configure",{
       orgId: "97D1F3F459CE0AD80A495CBE@AdobeOrg",
       edgeConfigId: "bc58b968-5317-4f56-991c-646ac1a384f6",
       edgeBasePath: "ee-pre-prd",
       idMigrationEnabled: false,
-      thirdPartyCookiesEnabled: false
+      thirdPartyCookiesEnabled: false,
+      onBeforeEventSend: ({ xdm }) => {
+        if (!displayNotificationSent && xdm.eventType === "decisioning.propositionDisplay") {
+          xdm._experience.decisioning.propositions.push(
+            displayXdm._experience.decisioning.propositions[0]
+          );
+          displayNotificationSent = true;
+        }
+      }
     });
     alloy("sendEvent", {
       renderDecisions: true,
       xdm: {
         web: {
           webPageDetails: {
-            name: "option1 browser"
+            name: "option3 browser"
           }
         }
       }
     });
-    alloy("sendEvent", {
-      xdm: {{DISPLAY_XDM}}
-    });
+    // fail-safe display notification in case the VEC offer never sends a display notification
+    setTimeout(() => {
+      if (!displayNotificationSent) {
+        displayNotificationSent = true;
+        alloy("sendEvent", {
+          xdm: displayXdm
+        });
+      }
+    }, 2000);
+
     document.getElementById("serverrendered").addEventListener("click", e => {
       alloy("sendEvent", {
         xdm: {{CLICK_XDM}}
