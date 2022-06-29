@@ -28,7 +28,14 @@
       thirdPartyCookiesEnabled: false
     });
     alloy("sendEvent", {
-      renderDecisions: true
+      renderDecisions: true,
+      xdm: {
+        web: {
+          webPageDetails: {
+            name: "option1 browser"
+          }
+        }
+      }
     });
     alloy("sendEvent", {
       xdm: {{DISPLAY_XDM}}

@@ -71,6 +71,11 @@ app.get("/", async (req, res) => {
   // build the XDM to send the display notification on the client
   const displayXdm = {
     eventType: "web.webpagedetails.pageViews",
+    web: {
+      webPageDetails: {
+        name: "option1 browser"
+      }
+    },
     identityMap: {
       FPID: [
         {
