@@ -73,7 +73,7 @@ app.get("/", async (req, res) => {
     eventType: "web.webpagedetails.pageViews",
     web: {
       webPageDetails: {
-        name: "option1 browser"
+        name: "option2 browser"
       }
     },
     identityMap: {
@@ -89,7 +89,6 @@ app.get("/", async (req, res) => {
   // get the content from the hybridpocserver scope, and update the XDM
   if (hybridpocserverPayload) {
     content = hybridpocserverPayload.items[0].data.content;
-    const eventTokens = hybridpocserverPayload.scopeDetails.characteristics.eventTokens;
     displayXdm.eventType = "decisioning.propositionDisplay";
     displayXdm._experience = {
       decisioning: {
@@ -97,12 +96,7 @@ app.get("/", async (req, res) => {
           {
             id: hybridpocserverPayload.id,
             scope: hybridpocserverPayload.scope,
-            scopeDetails: {
-              ...hybridpocserverPayload.scopeDetails,
-              characteristics: {
-                eventToken: eventTokens.display
-              }
-            }
+            scopeDetails: hybridpocserverPayload.scopeDetails
           }
         ]
       }
@@ -114,12 +108,7 @@ app.get("/", async (req, res) => {
           {
             id: hybridpocserverPayload.id,
             scope: hybridpocserverPayload.scope,
-            scopeDetails: {
-              ...hybridpocserverPayload.scopeDetails,
-              characteristics: {
-                eventToken: eventTokens.click
-              }
-            }
+            scopeDetails: hybridpocserverPayload.scopeDetails
           }
         ]
       }
