@@ -48,7 +48,7 @@ app.get("/", async (req, res) => {
 
   // Make the request to experience edge
   const dataStreamId = "dad9f0b7-4d22-41eb-a29e-d765294d483b";
-  const url = `https://edge.adobedc.net/ee-pre-prd${currentClusterPath}/v2/interact?dataStreamId=${dataStreamId}`;
+  const url = `https://${currentClusterPath}.server.adobedc.net/ee-pre-prd/v2/interact?dataStreamId=${dataStreamId}`;
   const body = buildRequestBody({ FPID });
   const response = await axios.post(url, body, { headers: { Cookie: cookieHeader } });
 
@@ -129,4 +129,3 @@ app.get("/", async (req, res) => {
 app.listen(port, () => {
   console.log(`App listening on port ${port}`);
 });
-
