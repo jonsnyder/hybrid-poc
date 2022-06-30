@@ -44,11 +44,12 @@ app.get("/", async (req, res) => {
 
   // Get the cluster from the request so that it can be added to the URL
   const currentCluster = req.cookies["kndctr_97D1F3F459CE0AD80A495CBE_AdobeOrg_cluster"];
-  const currentClusterPath = currentCluster ? `/${currentCluster}` : "";
+  // Replace "va6" with whichever konductor region is closest to your application server
+  const subdomain = currentCluster || "va6";
 
   // Make the request to experience edge
   const dataStreamId = "dad9f0b7-4d22-41eb-a29e-d765294d483b";
-  const url = `https://edge.adobedc.net/ee-pre-prd${currentClusterPath}/v2/interact?dataStreamId=${dataStreamId}`;
+  const url = `https://${subdomain}.server.adobedc.net/ee/v2/interact?dataStreamId=${dataStreamId}`;
   const body = buildRequestBody({ FPID });
   const response = await axios.post(url, body, { headers: { Cookie: cookieHeader } });
 
@@ -129,4 +130,3 @@ app.get("/", async (req, res) => {
 app.listen(port, () => {
   console.log(`App listening on port ${port}`);
 });
-
