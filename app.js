@@ -44,7 +44,7 @@ app.get("/", async (req, res) => {
 
   // Get the cluster from the request so that it can be added to the URL
   const currentCluster = req.cookies["kndctr_97D1F3F459CE0AD80A495CBE_AdobeOrg_cluster"];
-  const currentClusterPath = currentCluster ? `/${currentCluster}` : "";
+  const currentClusterPath = currentCluster ? `/${currentCluster}` : "va6";
 
   // Make the request to experience edge
   const dataStreamId = "dad9f0b7-4d22-41eb-a29e-d765294d483b";
